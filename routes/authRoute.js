@@ -8,6 +8,8 @@ const otpGenerator = require("otp-generator");
 //     res.send("Helloooooooooo")
 // })
 
+// Example of Authentication one start
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   port: 587,
@@ -77,6 +79,37 @@ _.post("/login/:email", async (req, res) => {
   }
 });
 
+_.post("/logout", async (req, res) => {
+  const { email } = req.body;
+  let existingUser = await User.findOne({ email: email });
+
+  if (existingUser.isLogin) {
+    await User.findOneAndUpdate({ email: email }, { otp: "", isLogin: false });
+  }
+});
+
+// Example of Authentication one end
+
+// _.post("/logout", async (req, res) => {
+//   const { email } = req.body;
+
+//   const user = await User.findOneAndUpdate(
+//     { email, isLogin: true },
+//     {
+//       otp: "",
+//       isLogin: false,
+//     }
+//   );
+
+//   if (!user) {
+//     return res.send("User not found or already logged out");
+//   }
+
+//   return res.send("Logout successful");
+// });
+
+//
+
 // /**
 //  * @swagger
 //  * /register:
@@ -132,8 +165,45 @@ _.post("/login/:email", async (req, res) => {
 //     user: {
 //       name,
 //       email,
-//     },
+//     },q
 //   });
 // });
+
+// Example of Authentication two start
+
+_.post("/login", async (req, res) => {
+  const { email, pass } = req.body;
+  
+  if (!email) {
+    res.json({
+      success: false,
+      message: "Please give a mail",
+    });
+  }
+
+  let existingUser = await User.findOne({ email: email });
+  if (existingUser) {
+    if (pass) {
+      if (existingUser.pass === pass) {
+        res.json("Login");
+      }else{
+        res.json("Wrong Password")
+      }
+    } else {
+      res.json("Password Den");
+    }  
+  }else{
+    if(pass){
+      let user = new User({
+        email : email,
+        pass : pass
+      }).save()
+    }else{
+      res.json('Password Create Koren')
+    }
+  }
+});
+
+// Example of Authentication two end
 
 module.exports = _;
